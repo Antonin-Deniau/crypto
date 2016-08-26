@@ -15,12 +15,14 @@ GEM
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.5.0)
     rspec-support (3.5.0)
+    words_counted (1.0.2)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
   rspec
+  words_counted
 
 BUNDLED WITH
    1.12.1
