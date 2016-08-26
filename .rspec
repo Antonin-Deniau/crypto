@@ -1,0 +1,3 @@
+--color
+--default-path chapters
+--pattern "**{,/*/**}/*.rb"
