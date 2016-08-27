@@ -1,13 +1,55 @@
 require 'rspec'
 extend RSpec::Matchers
 
-require "base64"
-require "words_counted"
-
 test = "Cooking MC's like a pound of bacon"
 pass = "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736"
 
 list = []
+
+def get_chi2 str
+  english_freq = [
+    0.08167, 0.01492, 0.02782, 0.04253, 0.12702, 0.02228, 0.02015, # A-G
+    0.06094, 0.06966, 0.00153, 0.00772, 0.04025, 0.02406, 0.06749, # H-N
+    0.07507, 0.01929, 0.00095, 0.05987, 0.06327, 0.09056, 0.02758, # O-U
+    0.00978, 0.02360, 0.00150, 0.01974, 0.00074                    # V-Z
+  ]
+
+  count = []
+  ignored = 0
+  for i in 0..26 - 1
+    count[i] = 0
+  end
+
+  for i in 0..str.length - 1
+    c = str[i].ord
+
+    case true
+    when c >= 65 && c <= 90
+      count[c - 65] = count[c - 65] + 1 # uppercase A-Z
+    when c >= 97 && c <= 122
+      count[c - 97] = count[c - 97] + 1 # lowercase a-z
+    when c >= 32 && c <= 126
+      ignored = ignored + 1 # numbers and punct.
+    when c == 9 || c == 10 || c == 13
+      ignored = ignored + 1 # TAB, CR, LF
+    else
+      return 100000000000000000000  # not printable ASCII = impossible(?)
+    end
+  end
+
+  chi2 = 0
+  len = str.length - ignored
+
+  for i in 0..26 - 1
+    observed = count[i]
+    expected = len * english_freq[i]
+    difference = observed - expected
+    chi2 += difference * difference / expected
+  end
+
+  return chi2
+end
+
 
 for x in 1..255
   ztest   = pass.scan(/../).map { |i| i.to_i(16) }
@@ -17,46 +59,14 @@ for x in 1..255
 
   enc = o.map { |i| i[0] ^ i[1] }.map { |i| i.chr }.join("")
 
-  counter = WordsCounted.count(enc) rescue next
+  freq = get_chi2(enc)
 
-  list.push [counter.char_count, enc]
+  list.push [freq, enc]
 end
 
-puts list.sort { |i, j| i[0] <=> j[0] }[-1]
-puts list.sort { |i, j| i[0] <=> j[0] }[-2]
-puts list.sort { |i, j| i[0] <=> j[0] }[-3]
-puts list.sort { |i, j| i[0] <=> j[0] }[-4]
-
-=begin
-E	12.02
-T	9.10
-A	8.12
-O	7.68
-I	7.31
-N	6.95
-S	6.28
-R	6.02
-H	5.92
-D	4.32
-L	3.98
-U	2.88
-C	2.71
-M	2.61
-F	2.30
-Y	2.11
-W	2.09
-G	2.03
-P	1.82
-B	1.49
-V	1.11
-K	0.69
-X	0.17
-Q	0.11
-J	0.10
-Z	0.07
-=end
-
+res = list.sort { |i, j| i[0] <=> j[0] }[0][1]
+puts res
 
 describe do
-  it { expect(enc).to eq(test) }
+  it { expect(res).to eq(test) }
 end
