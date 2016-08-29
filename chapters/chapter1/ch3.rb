@@ -65,7 +65,6 @@ for x in 1..255
 end
 
 res = list.sort { |i, j| i[0] <=> j[0] }[0][1]
-puts res
 
 describe do
   it { expect(res).to eq(test) }
