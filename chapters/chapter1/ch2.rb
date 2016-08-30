@@ -1,8 +1,3 @@
-require 'rspec'
-extend RSpec::Matchers
-
-require "base64"
-
 test = "746865206b696420646f6e277420706c6179"
 
 pass = "1c0111001f010100061a024b53535009181c"
@@ -15,6 +10,5 @@ o = zass.zip zecret
 
 enc = o.map { |i| i[0] ^ i[1] }.map { |i| i.to_s(16) }.join("")
 
-describe do
-  it { expect(enc).to eq(test) }
-end
+puts enc
+puts test

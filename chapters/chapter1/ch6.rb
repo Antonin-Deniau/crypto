@@ -1,54 +1,85 @@
-#require 'rspec'
+require_relative '../../utils'
 require 'base64'
-#extend RSpec::Matchers
 
-text = File.open("#{File.dirname(__FILE__)}/ch6.txt").read.each_byte.map { |i| i }
+text = Base64.decode64(File.open("#{File.dirname(__FILE__)}/ch6.txt").read).each_byte.map { |i| i }
 
-def hamming text_1, text_2
-  def hamming_byte a, b
-    a = a.to_s(2)
-    b = b.to_s(2)
+list = []
 
-    differences = 0
+puts "=============BEGIN BREAK CYPHER=============="
 
-    [a.length, b.length].min.times.count do |index|
-      differences += 1 if a[index] != b[index]
-    end
+puts "====GUESS KEYSIZES===="
+def get_key(index, length, text)
+  text[length * index..(length * (index + 1)) - 1]
+end
+
+for keysize in 1..39
+  puts "=====TRY #{keysize + 1}====="
+
+  worths = []
+  for i in 0..13
+    worths.push(get_key(i, keysize + 1, text))
   end
 
-  puts text_1.bytes.map { |i| i.to_s(2).rjust(8, ' ') }.join("-")
-  puts text_2.bytes.map { |i| i.to_s(2).rjust(8, ' ') }.join("-")
+  worths = worths.each_slice(2).map { |i| Utils.hamming(i[0], i[1]) / (keysize + 1).to_f }
+  hamming = worths.inject(0, :+) / worths.length
 
-  text_1 = text_1.bytes
-  text_2 = text_2.bytes
 
-  out = text_1.zip text_2
+  puts "HAMMING: " + hamming.to_s
+  puts "========================"
+  puts
 
-  out.map { |i| hamming_byte(i[0], i[1]) }.inject(0, :+)
+  list << [hamming, keysize + 1]
 end
+puts
+puts
 
-puts hamming("this is a test", "wokka wokka!!!")
+puts "====KEYSIZES===="
+puts "1: " + list.sort { |a,b| a[0] <=> b[0] }[0][1].to_s
+puts "2: " + list.sort { |a,b| a[0] <=> b[0] }[1][1].to_s
+puts "3: " + list.sort { |a,b| a[0] <=> b[0] }[2][1].to_s
+puts "4: " + list.sort { |a,b| a[0] <=> b[0] }[3][1].to_s
+puts "5: " + list.sort { |a,b| a[0] <=> b[0] }[4][1].to_s
+place = 0 # 0 = first, 1 = second, 2 = third
 
-=begin
-################################################
+keysize = list.sort { |a,b| a[0] <=> b[0] }[place][1]
+puts "================"
+puts
+puts
 
+puts "=======CREATE SLICES======"
+slices = text.each_slice(keysize).map { |i| keysize.times.collect { |j| i[j] || 0 } }
+puts "1ST SLICE: " + text.each_slice(keysize).map { |i| i }[0].join("-")
+puts "2ST SLICE: " + text.each_slice(keysize).map { |i| i }[1].join("-")
+puts "=========================="
+puts
+puts
 
+puts "====TRANSPOSE SLICES======"
+chunks = slices.transpose
+puts "1ST CHUNK: " + chunks[0].join("-")
+puts
+puts "2ND CHUNK: " + chunks[1].join("-")
+puts "=========================="
+puts
+puts
 
-plain = Base64.decode64 File.open("#{File.dirname(__FILE__)}/ch6.txt").read
-
-def xor(key, data)
-  secret = data.scan(/.|\n/).each_with_index.map { |x, i| key[i % key.length].ord }
-  data = data.scan(/.|\n/).map { |i| i.ord }
-
-  out = secret.zip data
-
-  out.map { |i| i[0] ^ i[1] }.map { |i| i.to_s(16).rjust(2, '0') }.join("")
+puts "=====BREAK KEY===="
+key = ""
+for i in 0..keysize -1
+  key << Utils.decode_xor(chunks[i])[0][2]
 end
+puts key
+puts "========================"
+puts
+puts
 
-plain.each_byte.each_slice(7) do |i|
-end
+puts "====MANUAL CORRECTION===="
+key = "Terminator X: Bring the noise"
+puts key
+puts "========================="
+puts
+puts
 
-#describe do
-#  it { expect(res).to eq(test) }
-#end
-=end
+puts "=====RESULT============="
+puts Utils.encode_xor(key, text).map { |i| i.chr }.join("")
+puts "========================"

@@ -1,6 +1,3 @@
-require 'rspec'
-extend RSpec::Matchers
-
 require "base64"
 
 test = "SSdtIGtpbGxpbmcgeW91ciBicmFpbiBsaWtlIGEgcG9pc29ub3VzIG11c2hyb29t"
@@ -10,6 +7,6 @@ res = hex.scan(/../).map { |i| i.to_i(16).chr }
 
 enc = Base64.strict_encode64 res.join("")
 
-describe do
-  it { expect(enc).to eq(test) }
-end
+
+puts enc
+puts test
