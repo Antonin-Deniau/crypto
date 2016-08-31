@@ -17,13 +17,14 @@ def ecb(text)
   crypto = OpenSSL::Cipher.new('AES-128-ECB')
   crypto.encrypt
   crypto.key = $key
+  crypto.padding = text.length % $key.length
 
   crypto.update(text) + crypto.final
 end
 
 $key = generate_key
 
-#res = ecb Base64.decode("Um9sbGluJyBpbiBteSA1LjAKV2l0aCBteSByYWctdG9wIGRvd24gc28gbXkgaGFpciBjYW4gYmxvdwpUaGUgZ2lybGllcyBvbiBzdGFuZGJ5IHdhdmluZyBqdXN0IHRvIHNheSBoaQpEaWQgeW91IHN0b3A/IE5vLCBJIGp1c3QgZHJvdmUgYnkK")
+test = ecb Base64.decode64("Um9sbGluJyBpbiBteSA1LjAKV2l0aCBteSByYWctdG9wIGRvd24gc28gbXkgaGFpciBjYW4gYmxvdwpUaGUgZ2lybGllcyBvbiBzdGFuZGJ5IHdhdmluZyBqdXN0IHRvIHNheSBoaQpEaWQgeW91IHN0b3A/IE5vLCBJIGp1c3QgZHJvdmUgYnkK")
 
 list = []
 for i in 1..63
@@ -47,10 +48,8 @@ else
   puts "===========cbc=========="
 end
 
-cmp = ecb("A" * 15)
-
 for i in 0..255
   res = ecb(("A" * 15) + i.chr)
 
-  puts "#{i.chr.inspect} #{ res == cmp ? "SUCCESS================" : "BAD"}"
+  puts "#{i.chr.inspect} #{ test[0..14] == res[0..14] ? "SUCCESS================" : "BAD"}"
 end
