@@ -5,8 +5,8 @@ require 'base64'
 def ecb(key, text)
   puts "=======ecb========"
   crypto = OpenSSL::Cipher.new('AES-128-ECB')
+  crypto.encrypt
   crypto.key = key
-  crypto.padding = 0
 
   crypto.update(text) + crypto.final
 end
@@ -21,8 +21,8 @@ def cbc(key, text)
     slice = slice.pack("C*")
 
     crypto = OpenSSL::Cipher.new('AES-128-ECB')
+    crypto.encrypt
     crypto.key = key
-    crypto.padding = 0
 
     out = crypto.update(slice) + crypto.final
 

@@ -48,7 +48,7 @@ module Utils
       roots = new_roots
       puts "Grow (len=#{len}): #{roots.inspect}" if $VERBOSE
     end
-    text[first,len-1]
+    text[first,len-1] rescue ""
   end
 
   def self.encode_xor(key, data)
