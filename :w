@@ -3,7 +3,7 @@ require 'openssl'
 require 'base64'
 
 def ecb(key, text)
-  puts "=======ecb========"
+  puts "=====ecb"
   crypto = OpenSSL::Cipher.new('AES-128-ECB')
   crypto.key = key
   crypto.padding = 0
@@ -12,7 +12,6 @@ def ecb(key, text)
 end
 
 def cbc(key, text)
-  puts "=======cbc========"
   iv =  (rand(0..255)).chr * key.length
 
   res = ""
@@ -43,31 +42,21 @@ end
 
 def generate_data(data)
   data = generate_random + data + generate_random
+  alg = rand(2) == 1 ? 'ECB' : 'CBC'
   key = generate_key
 
   padding  = (key.length - (data.length % key.length))
   data = data + (padding.chr * padding)
 
-  if rand(2) == 1
+  if alg == 'CBC'
     cbc(key, data)
   else
     ecb(key, data)
   end
-
-  # 16 pout skip rand | 2 * 16 pout detect | 16 pour skip rand | idk
-  # rand * 16         | input              | rand * 16         | padding
+  #rand * 16 | 0 * 64 | rand * 16 | padding
 end
 
-for i in 0..10
-  puts
+for i in 0..100
   res = generate_data("0" * 64)
-
-  chunk_1 = res[16..31]
-  chunk_2 = res[32..47]
-
-  if chunk_1 == chunk_2
-    puts "-------ecb--------"
-  else
-    puts "-------cbc--------"
-  end
+  puts Utils.longest_repeated_substring(res).length
 end
