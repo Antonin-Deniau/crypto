@@ -49,22 +49,6 @@ puts
 puts "Begin brute-force"
 puts
 
-=begin
-def brute(pass, index)
-  j = oracle("A" * index)
-
-  for x in 0..255
-    r = oracle("A" * index + pass + x.chr)
-
-    if j[159..159+15] == r[159..159+15]
-      return x.chr
-    end
-  end
-
-  "?"
-end
-=end
-
 def brute(pass, index)
   j = oracle("A" * index)
 
