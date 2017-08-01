@@ -31,8 +31,9 @@ puts "KEYLENGTH: #{l}"
 
 res = oracle("A" * 64)
 
-chunk_1 = res[0..15]
-chunk_2 = res[16..31]
+chunk_1 = res[0..0+15]
+chunk_2 = res[16..16+15]
+chunk_3 = res[32..32+15]
 
 if chunk_1 == chunk_2
   puts "===========ecb=========="
@@ -40,21 +41,48 @@ else
   puts "===========cbc=========="
 end
 
-def brute(t, l)
-  j = oracle("A" * l + t)
+puts chunk_1.chars.map { |b| b.ord.to_s(16) }.join("-")
+puts chunk_2.chars.map { |b| b.ord.to_s(16) }.join("-")
+puts chunk_3.chars.map { |b| b.ord.to_s(16) }.join("-")
+
+puts
+puts "Begin brute-force"
+puts
+
+=begin
+def brute(pass, index)
+  j = oracle("A" * index)
 
   for x in 0..255
-    r = oracle("A" * l + t + x.chr)
+    r = oracle("A" * index + pass + x.chr)
 
-    if j[0..15] == r[0..15]
-      return x
+    if j[159..159+15] == r[159..159+15]
+      return x.chr
     end
   end
+
+  "?"
+end
+=end
+
+def brute(pass, index)
+  j = oracle("A" * index)
+
+  for x in 0..255
+    r = oracle(("A" * index) + pass + x.chr)
+
+    if j[144..159] == r[144..159]
+      return x.chr
+    end
+  end
+
+  "?"
 end
 
 s = ""
-(0..15).to_a.reverse.each do |i|
-  s << brute(s, i).chr
+
+(0..159).to_a.reverse.each do |i|
+  s << brute(s, i)
 end
 
 puts s
